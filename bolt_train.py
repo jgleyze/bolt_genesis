@@ -3,7 +3,7 @@ import os
 import pickle
 import shutil
 
-from custom_env import CustomEnv
+from bolt_env import boltEnv
 from rsl_rl.runners import OnPolicyRunner
 
 import genesis as gs
@@ -108,17 +108,18 @@ def get_cfgs():
         "reward_scales": {
             "tracking_lin_vel": 1.0,
             "tracking_ang_vel": 0.2,
-            "lin_vel_z": -1.0,
-            "base_height": -1.0,
+            "lin_vel_z": -0.1,
+            "base_height": -0.0,
             "action_rate": -0.005,
-            "similar_to_default": -0.01,
+            "similar_to_default": -0.0,
+            "energy_consumption": -0.01,
         },
     }
     command_cfg = {
         "num_commands": 3,
-        "lin_vel_x_range": [1.0, 1.0],
-        "lin_vel_y_range": [-0.0, 0.0],
-        "ang_vel_range": [-0.0, 0.0],
+        "lin_vel_x_range": [-1.0, 1.0],
+        "lin_vel_y_range": [-1.0, 1.0],
+        "ang_vel_range": [-1.0, 1.0],
     }
 
     return env_cfg, obs_cfg, reward_cfg, command_cfg
@@ -126,7 +127,7 @@ def get_cfgs():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--exp_name", type=str, default="custom-walking")
+    parser.add_argument("-e", "--exp_name", type=str, default="bolt-walking")
     parser.add_argument("-B", "--num_envs", type=int, default=4096)
     parser.add_argument("--max_iterations", type=int, default=1000)
     args = parser.parse_args()
@@ -141,7 +142,7 @@ def main():
         shutil.rmtree(log_dir)
     os.makedirs(log_dir, exist_ok=True)
 
-    env = CustomEnv(
+    env = boltEnv(
         num_envs=args.num_envs, env_cfg=env_cfg, obs_cfg=obs_cfg, reward_cfg=reward_cfg, command_cfg=command_cfg, show_viewer=False
     )
 

@@ -9,7 +9,7 @@ def gs_rand_float(lower, upper, shape, device):
     return (upper - lower) * torch.rand(size=shape, device=device) + lower
 
 
-class CustomEnv:
+class boltEnv:
     def __init__(self, num_envs, env_cfg, obs_cfg, reward_cfg, command_cfg, show_viewer=False, device="cuda"):
         self.device = torch.device(device)
 
@@ -56,7 +56,7 @@ class CustomEnv:
             pos = (2.0, 0.0, 2.5),
             lookat = (0.0, 0.0, 0.5),
             fov = 40,
-            GUI = False,
+            GUI = show_viewer,
         )
 
         self.webviewer = BrowserStreamer(port=5000)
@@ -75,6 +75,8 @@ class CustomEnv:
                 quat=self.base_init_quat.cpu().numpy(),
             ),
         )
+
+        self.camera.follow_entity(self.robot, fixed_axis=(None, None, 2.5), smoothing=0.4, fix_orientation=True)
 
         # build
         self.scene.build(n_envs=num_envs)
@@ -266,6 +268,10 @@ class CustomEnv:
     def _reward_action_rate(self):
         # Penalize changes in actions
         return torch.sum(torch.square(self.last_actions - self.actions), dim=1)
+    
+    def _reward_energy_consumption(self):
+        # Penalize energy consumption
+        return torch.sum(torch.square(self.dof_vel * self.actions), dim=1)
 
     def _reward_similar_to_default(self):
         # Penalize joint poses far away from default pose
